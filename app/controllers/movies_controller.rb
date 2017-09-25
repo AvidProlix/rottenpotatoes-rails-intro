@@ -4,14 +4,20 @@ class MoviesController < ApplicationController
     params.require(:movie).permit(:title, :rating, :description, :release_date)
   end
 
-  def show
-    id = params[:id] # retrieve movie ID from URI route
+  def show id = params[:id] # retrieve movie ID from URI route
     @movie = Movie.find(id) # look up movie by unique ID
-    # will render app/views/movies/show.<extension> by default
   end
 
   def index
-    @movies = Movie.all
+    #@movies = Movie.all
+    sort = params[:sort]
+    case sort
+      when 'title'
+        @movies = Movie.order(sort)
+        @title_header = 'hilite'
+      else
+        @movies = Movie.all
+    end
   end
 
   def new
