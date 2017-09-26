@@ -9,26 +9,40 @@ class MoviesController < ApplicationController
   end
 
   def index
-    @movies = Movie.all
+    #all code sits here for the homework
+    @movies = Movie.all #by default return all the movies
     
+    @redirect = 0 
+    
+    #checked corresponds to the check boxes
     if(@checked != nil)
       @movies = @movies.find_all{ |m| @checked.has_key?(m.rating) and  @checked[m.rating]==true}      
     end
     
-    sort = params[:sort]
-    case sort
-      when 'title'
-        @movies = Movie.order(sort)
-        @title_header = 'hilite'
-      else
-        @movies = Movie.all
+    #allow sort by title
+    if(params[:sort].to_s == 'title')
+    session[:sort] = params[:sort]
+    @movies = @movies.sort_by{|m| m.title }
+   elsif(session.has_key?(:sort) ) #session manage
+    params[:sort] = session[:sort]
+    @redirect = 1
+   end
+    
+    #link ratings in movies with the ckeck boxes
+    if(params[:ratings] != nil)
+      session[:ratings] = params[:ratings]
+      @movies = @movies.find_all{ |m| params[:ratings].has_key?(m.rating) }
+    elsif(session.has_key?(:ratings) ) #session manage
+      params[:ratings] = session[:ratings]
+      @redirect =1
     end
     
-    if(params[:ratings] != nil)
-      @movies = @movies.find_all{ |m| params[:ratings].has_key?(m.rating) }
+    
+    if(@redirect ==1)
+    redirect_to movies_path(:sort=>params[:sort], :ratings =>params[:ratings] )
     end
 
-    
+    #connect movie ratings and checkboxes
     @checked = {}
     @all_ratings =  ['G','PG','PG-13','R']
 
